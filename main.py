@@ -18,7 +18,7 @@ score_surface = test_font.render("Bardou", False, (125,125,0))
 score_rect = score_surface.get_rect(midtop=(400,25))
 
 snail_surface = pygame.image.load("graphics/chico_novo_jogo.png").convert_alpha()
-snail_surface = pygame.transform.scale(snail_surface, (200,200))
+snail_surface = pygame.transform.scale(snail_surface, (150,100))
 snail_rect = snail_surface.get_rect(midbottom=(800,300))
 snail_speed = 3
 
@@ -42,11 +42,13 @@ def move_player():
         player_rect.x += player_speed
         if not player_facing_right:
             player_surf = pygame.transform.flip(player_surf, 1,0)
+            player_facing_right = True
 
     if keys[ord('a')]:
         player_rect.x -= player_speed
         if  player_facing_right:
             player_surf = pygame.transform.flip(player_surf, 1,0)
+            player_facing_right = False
 
     if keys[ord('w')] and player_rect.bottom == 300:        
         player_rect.bottom -= 25
@@ -62,18 +64,20 @@ while True:
         if game_active:
             if event.type == pygame.KEYDOWN:            
                 if event.key == pygame.K_SPACE and player_rect.bottom == 300:
-                    player_rect.bottom -= 25
-                    gravity = -50
+                    player_rect.bottom -= 50
+                    gravity = -20
             if event.type == pygame.MOUSEBUTTONDOWN:            
                 if player_rect.collidepoint(event.pos) and player_rect.bottom == 300:
-                    player_rect.bottom -= 25
-                    gravity = -50
+                    player_rect.bottom -= 50
+                    gravity = -20
         else:
             if event.type == pygame.KEYDOWN:            
                 if event.key == pygame.K_SPACE:
                     game_active = True
                     player_rect.left = 100
                     snail_rect.right = 800
+                    gravity = 0
+                    snail_speed = 3
                     start_time = pygame.time.get_ticks()
                     
     if game_active:
