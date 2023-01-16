@@ -6,33 +6,41 @@ width, height = 800,400
 pygame.init()
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Flappy Bãrdou")
+
 clock = pygame.time.Clock()
 game_active = True 
 start_time = 0
+
 test_font = pygame.font.Font("font/Pixeltype.ttf", 50)
 
 sky_surface = pygame.image.load("graphics/Sky.png").convert()
 ground_surface = pygame.image.load("graphics/Ground.png").convert()
 
-score_surface = test_font.render("Bardou", False, (125,125,0))
-score_rect = score_surface.get_rect(midtop=(400,25))
+title_surface = test_font.render("Bardou", False, (125,125,0))
+title_rect = title_surface.get_rect(midtop=(400,25))
 
 snail_surface = pygame.image.load("graphics/chico_novo_jogo.png").convert_alpha()
 snail_surface = pygame.transform.scale(snail_surface, (150,100))
 snail_rect = snail_surface.get_rect(midbottom=(800,300))
 snail_speed = 3
+snail_x_pos = snail_rect.x
 
 player_surf = pygame.image.load("graphics/player/player_walk_1.png").convert_alpha()
 player_rect = player_surf.get_rect(midbottom = (100,300))
-player_speed = 2
+player_speed = 3
 player_facing_right = True
-
+player_score = 0
+player_x_pos = player_rect.x
 gravity = 0
+def display_timer():
+    current_time = pygame.time.get_ticks() - start_time
+    timer_surf= test_font.render(f'{current_time/1000:.1f}s', False, (120,120,120))
+    timer_rect = timer_surf.get_rect(center = (400,75))
+    screen.blit(timer_surf, timer_rect)
 
 def display_score():
-    current_time = pygame.time.get_ticks() - start_time
-    score_surf= test_font.render(f'{current_time/1000:.1f}s', False, (120,120,120))
-    score_rect = score_surf.get_rect(center = (400,75))
+    score_surf= test_font.render(f'{player_score}', False, (120,120,120))
+    score_rect = score_surf.get_rect(center = (400,75+50))
     screen.blit(score_surf, score_rect)
 
 def move_player():
@@ -56,16 +64,17 @@ def move_player():
 
 while True:
     move_player()
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             pygame.quit()
             exit()
+
         if game_active:
             if event.type == pygame.KEYDOWN:            
                 if event.key == pygame.K_SPACE and player_rect.bottom == 300:
-                    player_rect.bottom -= 50
+                    player_rect.bottom -= 5
                     gravity = -20
+                        
             if event.type == pygame.MOUSEBUTTONDOWN:            
                 if player_rect.collidepoint(event.pos) and player_rect.bottom == 300:
                     player_rect.bottom -= 50
@@ -78,14 +87,24 @@ while True:
                     snail_rect.right = 800
                     gravity = 0
                     snail_speed = 3
+                    player_score = 0
                     start_time = pygame.time.get_ticks()
                     
     if game_active:
         screen.blit(sky_surface, (0,0))
         screen.blit(ground_surface, (0,300))
-        score_rect_color = pygame.draw.rect(screen, (0,225,225),score_rect,1,10)
-        screen.blit(score_surface,score_rect)
+        title_rect_color = pygame.draw.rect(screen, (0,225,225),title_rect,1,10)
+        screen.blit(title_surface,title_rect)
+        
+        display_timer()
         display_score()
+        print(player_x_pos, snail_x_pos, player_rect.x, snail_rect.x,player_x_pos < snail_x_pos, player_rect.x > snail_rect.x,player_x_pos < snail_x_pos and player_rect.x > snail_rect.x)
+
+        if player_x_pos - player_speed < snail_x_pos and player_rect.x > snail_rect.x:
+                player_score += 1
+                
+        player_x_pos = player_rect.x
+        snail_x_pos = snail_rect.x
 
         if snail_rect.right <= 0:
             snail_rect.left = 800
@@ -100,7 +119,7 @@ while True:
         if player_rect.bottom < 300:
             gravity += .75
             player_rect.top += gravity
-
+            
         if player_rect.bottom > 300:
             player_rect.bottom = 300
         
@@ -111,9 +130,9 @@ while True:
 
         if player_rect.colliderect(snail_rect):
             game_active = False
+
     else:
         screen.fill((255,0,0))
          
-
     pygame.display.update()
     clock.tick(60) 
